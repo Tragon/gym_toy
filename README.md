@@ -18,5 +18,5 @@ Here is an example
 
 ### Brief description of the environments
 * `lqr.py`      : linear-quadratic regulator.
-* `sparse1d.py` : gent moving on a 1D plane with sparse reward.
+* `sparse1d.py` : agent moving on a 1D plane with sparse reward.
 * `sparse2d.py` : like LQR, but with sparse reward.

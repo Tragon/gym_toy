@@ -6,7 +6,7 @@ import numpy as np
 '''
 ---- DESCRIPTION ----
 
-1D problem with simple dynamics.
+Car moving on a line.
 * The state is the agent position (x) and velocity (xd), and the bonus location (b).
 * The action is the acceleration.
 * The location of the bonus is randomly chosen at the beginning of the episode among
@@ -24,7 +24,7 @@ To recap, the reward is given only:
 * Always squared penalty on the action.
 '''
 
-class Sparse1DEnv(gym.Env):
+class SparseCarEnv(gym.Env):
 
     def __init__(self):
         self.action_space = spaces.Box(low=-0.1, high=0.1, shape=(1,), dtype=np.float32)
@@ -59,7 +59,7 @@ class Sparse1DEnv(gym.Env):
                 rwd += 1.
             done = True
 
-        if x_n < self.observation_space.low or x_n > self.observation_space.high:
+        if x_n < self.observation_space.low[0] or x_n > self.observation_space.high[0]:
             rwd -= 1.
             xd_n = 0.
 
@@ -67,7 +67,7 @@ class Sparse1DEnv(gym.Env):
         self.state[1] = xd_n
         self.state[2] = b
         self.state = np.clip(self.state + u, self.observation_space.low, self.observation_space.high)
-        rwd -= 0.001*u**2
+        rwd -= 0.001*np.sum(u**2)
 
         return self._get_obs(), rwd, done, {}
 

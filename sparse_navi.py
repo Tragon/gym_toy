@@ -5,7 +5,7 @@ import numpy as np
 '''
 ---- DESCRIPTION ----
 
-Dynamics are linear (s' = s + a) and reward is sparse.
+Navigation problem with linear dynamics (s' = s + a) and sparse reward.
 There are multiple goals, with the furthest yielding the highest reward.
 The initial position is fixed and the episode ends when a reward is collected.
 
@@ -13,7 +13,7 @@ With the default implementation, the highest reward is located in [20,20] and
 needs 20 steps to be collected. To make it challenging, set max_episode_steps=25.
 '''
 
-class Sparse2DEnv(gym.Env):
+class SparseNaviEnv(gym.Env):
 
     def __init__(self):
         self.size = 2 # dimensionality of state and action

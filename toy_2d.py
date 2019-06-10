@@ -13,7 +13,7 @@ The location of the bonus is randomly chosen at the beginning of the episode amo
 three possible positions: either behind the initial position of the agent, behind the goal or in between.
 The initial position is fixed, as well as the goal position.
 The agent gets the bonus if it is very close to it with almost 0 velocity. The bonus state gets set to +1 from initial -1.
-The episode ends when the agent is very close to the goal with almost 0 velocity.
+The episode ends when the agent is very close to the goal with almost 0 velocity or after the defined max_episode_steps.
 Reward only for getting to the goal. Doubled reward if he got the bonus prior.
 
 
@@ -45,12 +45,14 @@ class ToyChainSparseEnv2D(gym.Env):
                              [0.25, 0],
                              [0.8, -0.1]]
         self._seed()
+        self._step = 0
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def step(self,u):
+        self._step += 1
         u = np.clip(u, self.action_space.low, self.action_space.high)
         x = self.state[0] # player pos x
         y = self.state[1] # player pos y
@@ -82,13 +84,20 @@ class ToyChainSparseEnv2D(gym.Env):
             rwd -= 0.1 # bad boy
             yd_n = 0   # set velocity 0
 
+        # After the max step size we give the end bonus for the distance to goal. Double if we got the bonus.
+        if self._step >= self.spec.max_episode_steps and not done:
+            mult = 1.0
+            if gb > 0:
+                mult = 2.0
+            rwd += (dist_goal / self.start_dist) * mult
+
         self.state[0] = x_n#np.clip(x_n, self.observation_space.low, self.observation_space.high)
         self.state[1] = xd_n
         self.state[2] = y_n
         self.state[3] = yd_n
         self.state[6] = gb
         self.state = np.clip(self.state, self.observation_space.low, self.observation_space.high)
-        return self._get_obs(), rwd, done, {}
+        return self.state, rwd, done, {}
 
     def reset(self):
         b = np.random.randint(0,3)
@@ -103,6 +112,8 @@ class ToyChainSparseEnv2D(gym.Env):
                                self.goal_state[1]  # goal pos x
                                ])
         self.last_u = None
+        self._step = 0
+        self.start_dist = np.abs(self.state[0] - self.goal_state[0]) + np.abs(self.state[1] - self.goal_state[1])
         return self._get_obs()
 
     def _get_obs(self):

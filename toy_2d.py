@@ -37,7 +37,7 @@ class ToyChainSparseEnv2D(gym.Env):
 
     def __init__(self):
         self.action_space = spaces.Box(low=-0.1, high=0.1, shape=(2,), dtype=np.float32)
-        self.observation_space = spaces.Box(low=-1, high=1, shape=(9,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-1, high=1, shape=(10,), dtype=np.float32)
         self.dt = 0.1
         self.tol = 0.01
         self.goal_state = [0.6, 0]
@@ -46,6 +46,7 @@ class ToyChainSparseEnv2D(gym.Env):
                              [0.8, -0.1]]
         self._seed()
         self._step = 0
+        self.step_size = 1.0
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -80,8 +81,10 @@ class ToyChainSparseEnv2D(gym.Env):
         if np.abs(x_n) > 1: # collision with world border
             rwd -= 0.1 # bad boy
             xd_n = 0   # set velocity 0
-        if np.abs(y_n) > 0.5: # collision with imaginary street border obstacles
+            yd_n = 0   # set velocity 0
+        if np.abs(y_n) > 1: # collision with imaginary street border obstacles
             rwd -= 0.1 # bad boy
+            xd_n = 0   # set velocity 0
             yd_n = 0   # set velocity 0
 
         # After the max step size we give the end bonus for the distance to goal. Double if we got the bonus.
@@ -90,16 +93,19 @@ class ToyChainSparseEnv2D(gym.Env):
             if gb > 0:
                 mult = 2.0
             rwd += (dist_goal / self.start_dist) * mult
+            done = True
 
         self.state[0] = x_n#np.clip(x_n, self.observation_space.low, self.observation_space.high)
         self.state[1] = xd_n
         self.state[2] = y_n
         self.state[3] = yd_n
         self.state[6] = gb
+        self.state[9] = self.step_size * self._step
         self.state = np.clip(self.state, self.observation_space.low, self.observation_space.high)
         return self.state, rwd, done, {}
 
     def reset(self):
+        self._step = 0
         b = np.random.randint(0,3)
         self.state = np.array([0, # player pos x
                                0, # player pos y
@@ -109,10 +115,11 @@ class ToyChainSparseEnv2D(gym.Env):
                                self.bonus_states[b][1], # bonus pos y
                                -1, # got bonus?
                                self.goal_state[0], # goal pos x
-                               self.goal_state[1]  # goal pos x
+                               self.goal_state[1], # goal pos x
+                               0 # step
                                ])
+        self.step_size = 1.0 / self.spec.max_episode_steps
         self.last_u = None
-        self._step = 0
         self.start_dist = np.abs(self.state[0] - self.goal_state[0]) + np.abs(self.state[1] - self.goal_state[1])
         return self._get_obs()
 

@@ -80,7 +80,7 @@ class ToyChainSparseEnv(gym.Env):
             mult = 1.0
             if gb > 0:
                 mult = 2.0
-            rwd += (dist_goal / self.start_dist) * mult
+            rwd += (1.0 - (dist_goal / self.start_dist)) * mult
             done = True
 
         self.state[0] = x_n#np.clip(x_n, self.observation_space.low, self.observation_space.high)

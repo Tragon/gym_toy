@@ -68,7 +68,7 @@ class ToyChainSparseEnv2D(gym.Env):
         y_n = y + yd#*self.dt # already u*dt
 
         done = False
-        rwd = 0.
+        rwd = 0.0
         dist_goal = np.abs(x - self.goal_state[0]) + np.abs(y - self.goal_state[1])
         dist_bonus = np.abs(x - bx) + np.abs(y - by)
         if dist_bonus < self.tol and np.abs(xd) < self.tol and np.abs(yd) < self.tol:
@@ -92,7 +92,7 @@ class ToyChainSparseEnv2D(gym.Env):
             mult = 1.0
             if gb > 0:
                 mult = 2.0
-            rwd += (dist_goal / self.start_dist) * mult
+            rwd += (1.0 - (dist_goal / self.start_dist)) * mult
             done = True
 
         self.state[0] = x_n#np.clip(x_n, self.observation_space.low, self.observation_space.high)

@@ -63,9 +63,9 @@ class ToyChainSparseEnv2D(gym.Env):
         by = self.state[5] # bonus pos y
         gb = self.state[6] # got bonus?
         xd_n = xd + u[0]*self.dt
-        x_n = x + xd#*self.dt # already u*dt
+        x_n = x + xd*self.dt
         yd_n = yd + u[1]*self.dt
-        y_n = y + yd#*self.dt # already u*dt
+        y_n = y + yd*self.dt
 
         done = False
         rwd = 0.0
